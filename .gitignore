@@ -1,0 +1,4 @@
+.vscode/
+golang_web_server_rss_scraper
+.env
+thunder-tests/
