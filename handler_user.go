@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
 	"github.com/calebwagner/golang_web_server_rss_scraper/internal/database"
 	"github.com/google/uuid"
+	"github.com/calebwagner/golang_web_server_rss_scraper/internal/auth"
 )
+
 
 func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
@@ -32,6 +33,22 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 
 	if err != nil {
 		respondWithError(w, 400, fmt.Sprintf("Couldn't create user: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 201, databaseUserToUser(user))
+}
+
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request) {
+	apiKey, err :=  auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, 403, fmt.Sprintf("Auth error: %v", err))
+		return
+	}
+
+	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error getting user: %v", err))
 		return
 	}
 
